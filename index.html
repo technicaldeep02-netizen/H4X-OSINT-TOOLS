@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRETAIN C — OSINT Intelligence Suite v2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05070d;
+  --surface: #0a0f1c;
+  --surface-2: #0f1626;
+  --border: #1a2438;
+  --border-bright: #2a3a55;
+  --text: #e8edf5;
+  --text-dim: #8892a6;
+  --text-faint: #4a5568;
+  --accent: #00ff9d;
+  --accent-dim: #00cc7d;
+  --accent-glow: rgba(0, 255, 157, 0.15);
+  --purple: #a855f7;
+  --danger: #ff3b5c;
+  --warn: #ffb800;
+  --gold: #ffd700;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(circle at 15% 20%, rgba(0, 255, 157, 0.06) 0%, transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(168, 85, 247, 0.05) 0%, transparent 45%),
+    linear-gradient(rgba(26, 36, 56, 0.25) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(26, 36, 56, 0.25) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+  background-attachment: fixed;
+}
+
+/* ===== HEADER ===== */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(5, 7, 13, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: 0.5px;
+}
+
+.logo-mark {
+  width: 38px;
+  height: 38px;
+  border: 1.5px solid var(--accent);
+  border-radius: 10px;
+  background: var(--accent-glow);
+  box-shadow: 0 0 24px var(--accent-glow);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.logo-mark .logo-fallback {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 17px;
+  text-shadow: 0 0 12px var(--accent);
+  position: relative;
+  z-index: 1;
+}
+
+.logo-mark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, transparent 30%, rgba(0,255,157,0.3) 50%, transparent 70%);
+  animation: shimmer 3s infinite;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.5;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.logo-text { color: var(--text); }
+.logo-text span { color: var(--accent); }
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(0, 255, 157, 0.06);
+  border: 1px solid rgba(0, 255, 157, 0.2);
+  border-radius: 20px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.5px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 64px 32px 32px;
+  max-width: 1400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+.hero-badge .dot {
+  width: 5px;
+  height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.hero h1 {
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -2px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, #ffffff 0%, #b8c5d8 40%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  font-size: 16px;
+  color: var(--text-dim);
+  max-width: 680px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+.hero p strong { color: var(--accent); font-weight: 600; }
+
+/* ===== TOOL TABS ===== */
+.tool-tabs {
+  max-width: 1200px;
+  margin: 36px auto 0;
+  padding: 0 32px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.tool-tab {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 12px;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.tool-tab::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tool-tab:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+}
+
+.tool-tab.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, rgba(0,255,157,0.08), var(--surface));
+  box-shadow: 0 0 24px rgba(0,255,157,0.1);
+}
+
+.tool-tab.active::before { opacity: 1; }
+
+.tool-tab-icon {
+  font-size: 22px;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.tool-tab-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.tool-tab.active .tool-tab-name { color: var(--accent); }
+
+/* ===== CONSOLE ===== */
+.console-wrap {
+  max-width: 900px;
+  margin: 28px auto 0;
+  padding: 0 32px;
+}
+
+.console {
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+  border: 1px solid var(--border-bright);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(0, 255, 157, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.console-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--border);
+}
+
+.console-dots { display: flex; gap: 7px; }
+
+.console-dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #2a3a55;
+}
+
+.console-dots span:nth-child(1) { background: #ff5f57; }
+.console-dots span:nth-child(2) { background: #febc2e; }
+.console-dots span:nth-child(3) { background: #28c840; }
+
+.console-title {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.console-body { padding: 28px; }
+
+.field-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.field-label::before { content: '▸ '; color: var(--accent); }
+
+.input-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.input-wrap {
+  flex: 1;
+  position: relative;
+}
+
+.input-wrap::before {
+  content: '$';
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--mono);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+#targetInput {
+  width: 100%;
+  padding: 16px 18px 16px 40px;
+  background: var(--bg);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+
+#targetInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+#targetInput::placeholder {
+  color: var(--text-faint);
+  font-weight: 300;
+}
+
+.btn-scan {
+  padding: 16px 32px;
+  background: var(--accent);
+  color: #05070d;
+  border: none;
+  border-radius: 10px;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 0 24px var(--accent-glow);
+  white-space: nowrap;
+}
+
+.btn-scan:hover:not(:disabled) {
+  background: #00ffaa;
+  box-shadow: 0 0 36px rgba(0, 255, 157, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-scan:active:not(:disabled) { transform: translateY(0); }
+
+.btn-scan:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.hint {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+  letter-spacing: 0.3px;
+}
+
+.hint span { color: var(--accent-dim); }
+
+/* ===== RESULTS ===== */
+.results-section {
+  max-width: 1200px;
+  margin: 40px auto 0;
+  padding: 0 32px 60px;
+  display: none;
+}
+
+.results-section.active {
+  display: block;
+  animation: fadeUp 0.4s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.section-head h2 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.section-head .line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, var(--border-bright), transparent);
+}
+
+.section-head .count {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  padding: 4px 10px;
+  background: var(--accent-glow);
+  border: 1px solid rgba(0, 255, 157, 0.2);
+  border-radius: 6px;
+}
+
+.result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: linear-gradient(90deg, var(--surface-2), var(--surface));
+  border-bottom: 1px solid var(--border);
+}
+
+.card-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-glow);
+  border: 1px solid rgba(0, 255, 157, 0.25);
+  font-size: 16px;
+}
+
+.card-title { font-size: 15px; font-weight: 600; }
+
+.card-sub {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.card-tag {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 5px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  background: rgba(0, 255, 157, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(0, 255, 157, 0.3);
+}
+
+.card-body { padding: 24px; }
+
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.data-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color 0.2s;
+}
+
+.data-item:hover { border-color: var(--border-bright); }
+
+.data-key {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--text-faint);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.data-value {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text);
+  word-break: break-word;
+  line-height: 1.5;
+}
+
+.data-value.hl { color: var(--accent); }
+
+/* Powered By Badge */
+.powered-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 16px 24px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,157,0.06), transparent);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.powered-badge .label { color: var(--text-faint); }
+
+.powered-badge .brand {
+  background: linear-gradient(90deg, var(--accent), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+.powered-badge .sep { color: var(--text-faint); }
+
+.powered-badge .credit {
+  background: linear-gradient(90deg, var(--gold), var(--warn));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+/* Loader */
+.loader-wrap {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 60px 24px;
+}
+
+.loader-wrap.active { display: flex; }
+
+.loader-ring {
+  width: 44px;
+  height: 44px;
+  border: 2.5px solid var(--border-bright);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loader-text {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+/* Error */
+.error-box {
+  background: rgba(255, 59, 92, 0.06);
+  border: 1px solid rgba(255, 59, 92, 0.3);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.error-box .icon {
+  color: var(--danger);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.error-box .msg {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: #ff8ba0;
+  line-height: 1.6;
+}
+
+/* Raw JSON */
+.raw-toggle {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 0;
+  letter-spacing: 0.5px;
+  transition: color 0.2s;
+  margin-top: 16px;
+}
+
+.raw-toggle:hover { color: var(--accent); }
+
+.raw-json {
+  display: none;
+  margin-top: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent-dim);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 400px;
+  overflow-y: auto;
+  line-height: 1.6;
+}
+
+.raw-json.active { display: block; }
+
+/* ===== FEATURES ===== */
+.features {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 32px 80px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.feature {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 26px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.feature:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-3px);
+}
+
+.feature:hover::before { opacity: 1; }
+
+.feature-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--accent-glow);
+  border: 1px solid rgba(0, 255, 157, 0.2);
+  font-size: 19px;
+  margin-bottom: 16px;
+}
+
+.feature h3 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.2px;
+}
+
+.feature p {
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.footer-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.footer-brand .dev {
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.footer-note {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .tool-tabs { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 640px) {
+  header { padding: 0 18px; }
+  .header-inner { height: 60px; }
+  .status-pill { display: none; }
+  .hero { padding: 40px 18px 20px; }
+  .tool-tabs { padding: 0 18px; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 24px; }
+  .tool-tab { padding: 12px 8px; }
+  .tool-tab-icon { font-size: 18px; }
+  .tool-tab-name { font-size: 10px; }
+  .console-wrap { padding: 0 18px; }
+  .console-body { padding: 20px; }
+  .input-group { flex-direction: column; }
+  .btn-scan { width: 100%; }
+  .results-section { padding: 0 18px 40px; }
+  .features { padding: 20px 18px 60px; grid-template-columns: 1fr; }
+  .data-grid { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .powered-badge { flex-direction: column; gap: 6px; font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-mark" id="logoMark">
+        <img id="logoImg" src="" alt="Logo" style="display:none;">
+        <span class="logo-fallback" id="logoFallback">L</span>
+      </div>
+      <div class="logo-text">DRETAIN <span>C</span></div>
+    </div>
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      SYSTEM ONLINE
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-badge">
+    <span class="dot"></span>
+    OSINT INTELLIGENCE SUITE v2.0
+  </div>
+  <h1>Trace. Analyze. Discover.</h1>
+  <p>Advanced OSINT platform for <strong>multi-source intelligence</strong> — mobile, Instagram, Aadhaar, UPI & vehicle recon in real time.</p>
+</section>
+
+<div class="tool-tabs" id="toolTabs">
+  <div class="tool-tab active" data-tool="mobile">
+    <span class="tool-tab-icon">📱</span>
+    <div class="tool-tab-name">Mobile</div>
+  </div>
+  <div class="tool-tab" data-tool="instagram">
+    <span class="tool-tab-icon">📸</span>
+    <div class="tool-tab-name">Instagram</div>
+  </div>
+  <div class="tool-tab" data-tool="aadhaar">
+    <span class="tool-tab-icon">🪪</span>
+    <div class="tool-tab-name">Aadhaar</div>
+  </div>
+  <div class="tool-tab" data-tool="upi">
+    <span class="tool-tab-icon">💸</span>
+    <div class="tool-tab-name">UPI</div>
+  </div>
+  <div class="tool-tab" data-tool="vehicle">
+    <span class="tool-tab-icon">🚗</span>
+    <div class="tool-tab-name">Vehicle</div>
+  </div>
+</div>
+
+<div class="console-wrap">
+  <div class="console">
+    <div class="console-bar">
+      <div class="console-dots"><span></span><span></span><span></span></div>
+      <div class="console-title" id="consoleTitle">deep@osint:~$ mobile_query</div>
+    </div>
+    <div class="console-body">
+      <label class="field-label" for="targetInput" id="fieldLabel">Target Mobile Number</label>
+      <div class="input-group">
+        <div class="input-wrap">
+          <input type="text" id="targetInput" placeholder="Enter 10-digit mobile number" maxlength="20" autocomplete="off">
+        </div>
+        <button class="btn-scan" id="scanBtn">Run Scan</button>
+      </div>
+      <div class="hint" id="hintText">Format: <span>10-digit number</span> · Example: <span>9876543210</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="results-section" id="results">
+  <div class="section-head">
+    <h2>Intelligence Report</h2>
+    <div class="line"></div>
+    <div class="count" id="resultCount">0 FIELDS</div>
+  </div>
+
+  <div class="loader-wrap" id="loader">
+    <div class="loader-ring"></div>
+    <div class="loader-text">Querying intelligence database...</div>
+  </div>
+
+  <div id="resultOutput"></div>
+</div>
+
+<section class="features">
+  <div class="feature">
+    <div class="feature-icon">🎯</div>
+    <h3>Multi-Source Lookup</h3>
+    <p>Five intelligence modules — Mobile, Instagram, Aadhaar, UPI & Vehicle — in one unified console.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🔐</div>
+    <h3>Secure Pipeline</h3>
+    <p>All queries routed through encrypted channels. No logs, no traces, no retention.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">⚡</div>
+    <h3>Instant Results</h3>
+    <p>Optimized query engine returns structured intelligence in under two seconds.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🛡️</div>
+    <h3>Hardcoded Endpoints</h3>
+    <p>API endpoints locked inside the source — no exposed config, no tampering, no theft.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <span>Developed by</span>
+      <span class="dev">DRETAIN C</span>
+    </div>
+    <div class="footer-note">© 2026 DRETAIN C · OSINT Suite · v2.0</div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   🖼️ LOGO IMAGE — YAHAN APNI IMAGE KA URL DAALO
+   ============================================================ */
+const LOGO_IMAGE_URL = "https://res.cloudinary.com/dihj6dmbb/image/upload/v1792748394/quickurl/ab0fa6e6e484a8d2cc8bcf0b69e9c4de_1792748391981.jpg"; // Example: "https://example.com/logo.png"
+/* ============================================================ */
+
+/* ============================================================
+   ⚙ API ENDPOINTS — YAHAN APNE API URLs DAALO
+   {query} ko query value se replace kar diya jaayega.
+   ============================================================ */
+const API_CONFIG = {
+  mobile:    "https://cyberteam-g6aw.onrender.com/api/number?key=h4xsensi&num={query}",
+  instagram: "",
+  aadhaar:   "https://cyberteam-g6aw.onrender.com/api/aadhar?key=h4xsensi&num={query}",
+  upi:       "",
+  vehicle:   "https://cyberteam-g6aw.onrender.com/api/vechile-info?key=h4xsensi&vechile={query}"
+};
+/* ============================================================ */
+
+/* ========== TOOL DEFINITIONS ========== */
+const TOOLS = {
+  mobile: {
+    name: 'Mobile',
+    icon: '📱',
+    fieldLabel: 'Target Mobile Number',
+    placeholder: 'Enter 10-digit mobile number',
+    hint: 'Format: <span>10-digit number</span> · Example: <span>9876543210</span>',
+    validate: v => /^\d{10}$/.test(v),
+    errorMsg: 'Invalid input. Enter a valid 10-digit mobile number.<br>Example: 9876543210',
+    title: 'Mobile Intelligence Report',
+    consoleCmd: 'mobile_query',
+    tag: 'LIVE DATA',
+    labels: {
+      mobile: 'Mobile Number', name: 'Full Name', fname: 'Father Name',
+      address: 'Address', alt: 'Alternate Number', circle: 'Telecom Circle', email: 'Email Address'
+    }
+  },
+  instagram: {
+    name: 'Instagram',
+    icon: '📸',
+    fieldLabel: 'Target Instagram Username',
+    placeholder: 'Enter Instagram username',
+    hint: 'Format: <span>username</span> (without @) · Example: <span>instagram</span>',
+    validate: v => v.length >= 1 && /^[a-zA-Z0-9._]+$/.test(v),
+    errorMsg: 'Invalid input. Enter a valid Instagram username.<br>Example: instagram',
+    title: 'Instagram Intelligence Report',
+    consoleCmd: 'instagram_query',
+    tag: 'LIVE DATA',
+    labels: {
+      username: 'Username', full_name: 'Full Name', followers: 'Followers',
+      following: 'Following', posts: 'Posts', bio: 'Bio', email: 'Email',
+      phone: 'Phone', profile_pic: 'Profile Picture', verified: 'Verified', id: 'User ID'
+    }
+  },
+  aadhaar: {
+    name: 'Aadhaar',
+    icon: '🪪',
+    fieldLabel: 'Target Aadhaar Number',
+    placeholder: 'Enter 12-digit Aadhaar number',
+    hint: 'Format: <span>12-digit number</span> · Example: <span>123456789012</span>',
+    validate: v => /^\d{12}$/.test(v),
+    errorMsg: 'Invalid input. Enter a valid 12-digit Aadhaar number.<br>Example: 123456789012',
+    title: 'Aadhaar Intelligence Report',
+    consoleCmd: 'aadhaar_query',
+    tag: 'LIVE DATA',
+    labels: {
+      aadhaar: 'Aadhaar Number', name: 'Full Name', dob: 'Date of Birth',
+      gender: 'Gender', address: 'Address', phone: 'Phone', email: 'Email',
+      father_name: 'Father Name', district: 'District', state: 'State', pincode: 'Pincode'
+    }
+  },
+  upi: {
+    name: 'UPI',
+    icon: '💸',
+    fieldLabel: 'Target UPI ID',
+    placeholder: 'Enter UPI ID (e.g. name@bank)',
+    hint: 'Format: <span>name@bank</span> · Example: <span>user@paytm</span>',
+    validate: v => /^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,}$/.test(v),
+    errorMsg: 'Invalid input. Enter a valid UPI ID.<br>Example: user@paytm',
+    title: 'UPI Intelligence Report',
+    consoleCmd: 'upi_query',
+    tag: 'LIVE DATA',
+    labels: {
+      upi: 'UPI ID', vpa: 'VPA', name: 'Account Holder', bank: 'Bank Name',
+      account: 'Account Number', ifsc: 'IFSC Code', branch: 'Branch',
+      phone: 'Phone', email: 'Email', status: 'Status', type: 'Account Type',
+      verified: 'Verified', provider: 'Provider'
+    }
+  },
+  vehicle: {
+    name: 'Vehicle',
+    icon: '🚗',
+    fieldLabel: 'Target Vehicle Registration',
+    placeholder: 'Enter vehicle registration number',
+    hint: 'Format: <span>XX00XX0000</span> · Example: <span>MH01AB1234</span>',
+    validate: v => /^[A-Z]{2}[0-9]{2}[A-Z]{0,3}[0-9]{4}$/.test(v.toUpperCase().replace(/\s/g, '')),
+    errorMsg: 'Invalid input. Enter a valid vehicle registration number.<br>Example: MH01AB1234',
+    title: 'Vehicle Intelligence Report',
+    consoleCmd: 'vehicle_query',
+    tag: 'LIVE DATA',
+    labels: {
+      rc: 'Registration Number', owner: 'Owner Name', father_name: 'Father Name',
+      address: 'Address', vehicle_class: 'Vehicle Class', vehicle_type: 'Vehicle Type',
+      model: 'Model', maker: 'Maker', fuel: 'Fuel Type', engine: 'Engine Number',
+      chassis: 'Chassis Number', insurance: 'Insurance', reg_date: 'Registration Date',
+      rto: 'RTO', state: 'State', phone: 'Phone', email: 'Email'
+    }
+  }
+};
+
+/* ========== STATE ========== */
+let currentTool = 'mobile';
+
+/* ========== HELPERS ========== */
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// 100% Direct API Call (No Proxy)
+function buildApiUrl(toolKey, query) {
+  const base = API_CONFIG[toolKey];
+  if (!base) return null;
+  return base.replace(/\{query\}/g, query);
+}
+
+/* ========== LOGO IMAGE LOAD ========== */
+function initLogo() {
+  if (LOGO_IMAGE_URL && LOGO_IMAGE_URL.trim() !== '') {
+    const img = document.getElementById('logoImg');
+    const fallback = document.getElementById('logoFallback');
+    img.src = LOGO_IMAGE_URL;
+    img.style.display = 'block';
+    img.onload = () => { fallback.style.display = 'none'; };
+    img.onerror = () => { img.style.display = 'none'; fallback.style.display = 'block'; };
+  }
+}
+
+/* ========== TAB SWITCHING ========== */
+const tabs = document.querySelectorAll('.tool-tab');
+const input = document.getElementById('targetInput');
+const scanBtn = document.getElementById('scanBtn');
+const results = document.getElementById('results');
+const loader = document.getElementById('loader');
+const output = document.getElementById('resultOutput');
+const countEl = document.getElementById('resultCount');
+const consoleTitle = document.getElementById('consoleTitle');
+const fieldLabel = document.getElementById('fieldLabel');
+const hintText = document.getElementById('hintText');
+
+function switchTool(toolKey) {
+  currentTool = toolKey;
+  const t = TOOLS[toolKey];
+
+  tabs.forEach(tab => tab.classList.toggle('active', tab.dataset.tool === toolKey));
+
+  consoleTitle.textContent = `deep@osint:~$ ${t.consoleCmd}`;
+  fieldLabel.textContent = t.fieldLabel;
+  input.placeholder = t.placeholder;
+  input.value = '';
+  input.maxLength = toolKey === 'mobile' ? 10 : toolKey === 'aadhaar' ? 12 : 40;
+  hintText.innerHTML = t.hint;
+
+  results.classList.remove('active');
+  loader.classList.remove('active');
+  output.innerHTML = '';
+  scanBtn.disabled = false;
+  scanBtn.textContent = 'Run Scan';
+}
+
+tabs.forEach(tab => {
+  tab.addEventListener('click', () => switchTool(tab.dataset.tool));
+});
+
+/* ========== RENDER RESULT ========== */
+function renderField(tool, key, value) {
+  const label = (TOOLS[tool].labels && TOOLS[tool].labels[key]) || key;
+  const display = (value === null || value === undefined || value === '') ? '—' : value;
+  const isHl = ['name', 'mobile', 'username', 'aadhaar', 'upi', 'vpa', 'rc'].includes(key);
+  return `<div class="data-item">
+    <div class="data-key">${escapeHtml(label)}</div>
+    <div class="data-value${isHl ? ' hl' : ''}">${escapeHtml(display)}</div>
+  </div>`;
+}
+
+function renderResult(data, query) {
+  const t = TOOLS[currentTool];
+  const d = data.data || data.result || data.message || data;
+  let fields = [];
+
+  if (typeof d === 'object' && d !== null && !Array.isArray(d)) {
+    fields = Object.entries(d).filter(([k, v]) => v !== null && v !== undefined && typeof v !== 'object');
+    if (fields.length === 0) {
+      fields = Object.entries(d).map(([k, v]) => [k, JSON.stringify(v)]);
+    }
+  } else {
+    fields = [['result', String(d)]];
+  }
+
+  countEl.textContent = `${fields.length} FIELDS`;
+  const displayQuery = currentTool === 'mobile' ? `+91 ${escapeHtml(query)}` : escapeHtml(query);
+
+  const html = `<div class="result-card">
+    <div class="card-head">
+      <div class="card-head-left">
+        <div class="card-icon">${t.icon}</div>
+        <div>
+          <div class="card-title">${escapeHtml(t.title)}</div>
+          <div class="card-sub">Target: ${displayQuery}</div>
+        </div>
+      </div>
+      <div class="card-tag">${t.tag}</div>
+    </div>
+    <div class="card-body">
+      <div class="data-grid">
+        ${fields.map(([k, v]) => renderField(currentTool, k, v)).join('')}
+      </div>
+      <button class="raw-toggle" onclick="this.nextElementSibling.classList.toggle('active')">▸ View Raw Response</button>
+      <div class="raw-json">${escapeHtml(JSON.stringify(data, null, 2))}</div>
+      <div class="powered-badge">
+        <span class="label">POWERED BY :</span>
+        <span class="brand">H4X DEEP</span>
+        <span class="sep">|</span>
+        <span class="label">CREDIT BY :</span>
+        <span class="credit">DRETAIN C</span>
+      </div>
+    </div>
+  </div>`;
+
+  output.innerHTML = html;
+}
+
+/* ========== RUN SCAN ========== */
+async function runScan() {
+  const t = TOOLS[currentTool];
+  let query = input.value.trim();
+
+  if (currentTool === 'vehicle') {
+    query = query.toUpperCase().replace(/\s/g, '');
+  } else if (currentTool === 'mobile' || currentTool === 'aadhaar') {
+    query = query.replace(/\D/g, '');
+  } else if (currentTool === 'upi') {
+    query = query.toLowerCase().replace(/\s/g, '');
+  }
+
+  if (!query || !t.validate(query)) {
+    results.classList.add('active');
+    loader.classList.remove('active');
+    countEl.textContent = 'ERROR';
+    output.innerHTML = `<div class="error-box">
+      <div class="icon">⚠</div>
+      <div class="msg">${t.errorMsg}</div>
+    </div>`;
+    return;
+  }
+
+  const apiUrl = buildApiUrl(currentTool, query);
+
+  if (!apiUrl) {
+    results.classList.add('active');
+    loader.classList.remove('active');
+    countEl.textContent = 'NO API';
+    output.innerHTML = `<div class="error-box">
+      <div class="icon">⚠</div>
+      <div class="msg">No API endpoint configured for <strong>${escapeHtml(t.name)}</strong>.</div>
+    </div>`;
+    return;
+  }
+
+  results.classList.add('active');
+  loader.classList.add('active');
+  output.innerHTML = '';
+  scanBtn.disabled = true;
+  scanBtn.textContent = 'Scanning...';
+  countEl.textContent = '...';
+
+  try {
+    // Seedha API call, koi proxy nahi
+    const res = await fetch(apiUrl);
+    if (!res.ok) throw new Error('Network response was not ok');
+    
+    const textData = await res.text(); 
+    let data;
+    try {
+      data = JSON.parse(textData);
+    } catch (e) {
+      data = { result: textData };
+    }
+
+    loader.classList.remove('active');
+    renderResult(data, query);
+
+  } catch (err) {
+    loader.classList.remove('active');
+    countEl.textContent = 'FAILED';
+    output.innerHTML = `<div class="error-box">
+      <div class="icon">⚠</div>
+      <div class="msg">Data fetch failed. The server is currently offline or blocking requests.<br><br><b>Note:</b> If you are opening this file directly on your phone (file://), CORS might block it. Please host it on a website (like Vercel/GitHub) to get the data perfectly.</div>
+    </div>`;
+  } finally {
+    scanBtn.disabled = false;
+    scanBtn.textContent = 'Run Scan';
+  }
+}
+
+scanBtn.addEventListener('click', runScan);
+input.addEventListener('keydown', e => { if (e.key === 'Enter') runScan(); });
+
+/* ========== INIT ========== */
+initLogo();
+switchTool('mobile');
+</script>
+
+</body>
+</html>
